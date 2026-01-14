@@ -1,0 +1,57 @@
+@import "pretendard/dist/web/variable/pretendardvariable.css";
+
+@import "tailwindcss";
+
+/* @theme에서는 색상, 간격, 폰트만 정의 */
+@theme {
+  /* 색상만 정의 */
+  --color-sky-light: #60a5fa;
+  --color-sky-dark: #2563eb;
+
+  /* 검색 UI 및 즐겨찾기 카드 */
+  --color-dark-overlay: #0f172a; /* 검색 오버레이 배경 */
+  --color-dark-card: #1e293b; /* 검색 입력창, 즐겨찾기 카드 */
+  --color-dark-border: #334155; /* 구분선 */
+
+  --color-white: #ffffff; /* 메인 텍스트 */
+  --color-grey: #94a3b8; /* placeholder, 부가 정보 */
+
+  --color-card-glass: rgba(255, 255, 255, 0.2); /* 메인 카드 (유리 효과) */
+  --color-card-dark: rgba(30, 41, 59, 0.8); /* 즐겨찾기 카드 */
+
+  /* 블러 */
+  --backdrop-blur-glass: 12px;
+
+  --breakpoint-mobile: 360px;
+  --breakpoint-tablet: 768px;
+  --breakpoint-desktop: 1300px;
+}
+
+/* @theme 밖에서 커스텀 유틸리티 클래스 (그라디언트, 복잡한 스타일) 정의 */
+@utility bg-sunny {
+  background-image: linear-gradient(to bottom, #60a5fa, #2563eb);
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+:root {
+  font-size: 62.5%;
+}
+
+body {
+  font-family: "Pretendard Variable", sans-serif;
+  font-size: 1.6rem;
+  line-height: 1.2;
+  height: 100%;
+}
+
+img {
+  max-width: 100%;
+  vertical-align: bottom;
+}
