@@ -5,14 +5,30 @@ import { fetchWeatherData } from "@/shared/api/weather";
 import type { WeatherData } from "@/shared/model/weather";
 import { geocodeLocation } from "@/shared/api/geocoding";
 import { X, MapPin } from "lucide-react";
+import { add, isFavorite, remove } from "@/features/favorites/api";
+import { useNavigate } from "react-router-dom";
+import { useSearch } from "@/widgets/search-overlay/model/searchContext";
 
 export default function LocationModal() {
   const { selectedLocation, isModalOpen, closeModal } = useLocationModal();
-
+  const { toggleSearch } = useSearch();
   // Modal 내부에서 날씨 데이터 관리
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isFavorited, setIsFavorited] = useState(false);
+  const navigate = useNavigate();
+  const [coords, setCoords] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+
+  // 현재 위치가 즐겨찾기에 있는지 확인
+  useEffect(() => {
+    if (selectedLocation) {
+      setIsFavorited(isFavorite(selectedLocation.id));
+    }
+  }, [selectedLocation]);
 
   // selectedLocation이 변경되면 날씨 데이터 가져오기
   useEffect(() => {
@@ -21,15 +37,14 @@ export default function LocationModal() {
     const loadWeatherData = async () => {
       setIsLoading(true);
       setError(null);
+      console.log("🌤️Loading weather for location:", selectedLocation);
 
       try {
-        console.log("1. Geocoding location:", selectedLocation.name);
-        const coords = await geocodeLocation(selectedLocation.name);
+        const coords = await geocodeLocation(selectedLocation.name); // 주소 → 좌표 변환
+        setCoords(coords); // 좌표 상태에 저장
 
-        const weather = await fetchWeatherData(coords);
-        console.log("3. Weather:", weather);
-
-        setWeatherData(weather);
+        const weather = await fetchWeatherData(coords); // 좌표 → 날씨정보 GET
+        setWeatherData(weather); // 로컬 상태에 저장
       } catch (err) {
         console.error("Failed to load weather:", err);
         setError("날씨 정보를 불러오는데 실패했습니다.");
@@ -40,6 +55,30 @@ export default function LocationModal() {
 
     loadWeatherData();
   }, [selectedLocation]);
+
+  // 즐겨찾기 토글
+  const handleToggleFavorite = () => {
+    if (!selectedLocation || !coords) return;
+
+    if (isFavorited) {
+      remove(selectedLocation.id);
+      setIsFavorited(false);
+      console.log("즐겨찾기에서 제거:", selectedLocation.name);
+    } else {
+      add({
+        id: selectedLocation.id,
+        name: selectedLocation.name,
+        city: selectedLocation.city,
+        lat: coords.latitude,
+        lng: coords.longitude,
+      });
+      setIsFavorited(true);
+      closeModal();
+      toggleSearch();
+      navigate("/favorites");
+      console.log("즐겨찾기에 추가:", selectedLocation.name);
+    }
+  };
 
   // 모달이 열려있지 않으면 렌더링 안 함
   if (!isModalOpen || !selectedLocation) return null;
@@ -68,10 +107,11 @@ export default function LocationModal() {
           <h1 className="font-semibold text-white">날씨 정보</h1>
 
           <button
+            onClick={handleToggleFavorite}
             className="px-4 py-2 bg-primary hover:bg-white/5 text-white font-semibold rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer"
-            aria-label="즐겨찾기 추가"
+            aria-label={isFavorited ? "즐겨찾기 제거" : "즐겨찾기 추가"}
           >
-            <span>추가</span>
+            <span>{isFavorited ? "제거" : "추가"}</span>
           </button>
         </header>
 

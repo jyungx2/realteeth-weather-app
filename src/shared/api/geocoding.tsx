@@ -56,7 +56,7 @@ export async function geocodeLocation(address: string): Promise<Coordinates> {
 
     console.log("✅ Kakao Result:", {
       address: result.address_name,
-      coords: { lat: result.y, lon: result.x },
+      coords: { lat: result.y, lng: result.x },
     });
 
     return {

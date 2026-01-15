@@ -2,6 +2,8 @@ export interface SelectedLocation {
   id: number;
   name: string;
   city: string;
+  lat: number;
+  lng: number;
 }
 
 // Context에서 제공할 값의 타입 정의

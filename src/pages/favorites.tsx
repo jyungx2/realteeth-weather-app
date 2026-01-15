@@ -1,30 +1,61 @@
 import Layout from "@/widgets/layout/ui";
 import { useSearch } from "@/widgets/search-overlay/model/searchContext";
 import { Search, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getAll } from "@/features/favorites/api";
+import type { FavoriteWithWeather } from "@/features/favorites/model/types";
+import { fetchWeatherData } from "@/shared/api/weather";
 
 export default function Favorites() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const { toggleSearch } = useSearch();
+  const [favoritesWithWeather, setFavoritesWithWeather] = useState<
+    FavoriteWithWeather[]
+  >([]);
 
-  const favorites = [
-    {
-      id: "1",
-      location: "Ottawa",
-      currentTemp: -2,
-      highTemp: -2,
-      lowTemp: -8,
-    },
-    {
-      id: "2",
-      location: "Montreal",
-      currentTemp: -1,
-      highTemp: -1,
-      lowTemp: -7,
-    },
-  ];
+  useEffect(() => {
+    const loadFavoritesWithWeather = async () => {
+      const favoritesList = getAll();
+
+      // 초기 데이터 (로딩 상태)
+      const initialData: FavoriteWithWeather[] = favoritesList.map((fav) => ({
+        ...fav,
+        isLoading: true,
+      }));
+      setFavoritesWithWeather(initialData);
+
+      // 각 즐겨찾기 위치의 날씨 가져오기
+      const weatherPromises = favoritesList.map(async (favorite) => {
+        try {
+          const weather = await fetchWeatherData({
+            latitude: favorite.lat,
+            longitude: favorite.lng,
+          });
+          return {
+            ...favorite,
+            currentTemp: weather.currentTemp,
+            highTemp: weather.highTemp,
+            lowTemp: weather.lowTemp,
+            condition: weather.condition,
+            isLoading: false,
+          };
+        } catch (error) {
+          console.error(`날씨 로드 실패 (${favorite.name}):`, error);
+          return {
+            ...favorite,
+            isLoading: false,
+          };
+        }
+      });
+
+      const results = await Promise.all(weatherPromises);
+      setFavoritesWithWeather(results);
+    };
+
+    loadFavoritesWithWeather();
+  }, []);
 
   return (
     <Layout
@@ -42,7 +73,7 @@ export default function Favorites() {
       mainCN="pt-[4rem]"
     >
       <div className="flex items-center gap-3 bg-dark-overlay rounded-3xl px-4 py-4 flex-1 mb-10">
-        <Search size={20} className="text-grey flex-shrink-0" />
+        <Search size={20} className="text-grey shrink-0" />
 
         <input
           type="text"
@@ -68,7 +99,7 @@ export default function Favorites() {
       {/* 카드 그리드 */}
       <div className="grid grid-cols-1 tablet:grid-cols-2 desktop:grid-cols-3 gap-6 auto-rows-fr ">
         {/* 날씨 카드들 */}
-        {favorites.map((favorite) => (
+        {favoritesWithWeather.map((favorite) => (
           <div
             key={favorite.id}
             className="relative bg-dark-card/90 rounded-3xl p-6 tablet:p-[2.2rem] desktop:p-[2.4rem] text-white hover:bg-dark-card transition-colors "
@@ -80,26 +111,26 @@ export default function Favorites() {
                 e.stopPropagation();
                 // handleRemove(favorite.id);
               }}
-              className="absolute top-4 right-4 p-4 hover:bg-white/10 rounded-full transition-colors cursor-pointer"
+              className="absolute top-4 right-4 p-3 hover:bg-white/10 rounded-full transition-colors cursor-pointer"
               aria-label="삭제"
             >
-              <img src="/bin.svg" alt="삭제" />
+              <img src="/bin.svg" alt="삭제" className="w-8" />
             </button>
 
             <button
               onClick={(e) => {
                 e.stopPropagation();
               }}
-              className="absolute top-4 right-22 p-4 hover:bg-white/10 rounded-full transition-colors cursor-pointer"
+              className="absolute top-4 right-18 p-3 hover:bg-white/10 rounded-full transition-colors cursor-pointer"
               aria-label="수정"
             >
-              <img src="/pencil.svg" alt="수정" />
+              <img src="/pencil.svg" alt="수정" className="w-8" />
             </button>
 
             {/* 카드 내용 */}
             <div className="pr-10">
               <h3 className="text-[2rem] tablet:text-[2.4rem] desktop:text-[2.6rem] font-medium mb-4">
-                {favorite.location}
+                {favorite.name.split(" ")[favorite.name.split(" ").length - 1]}
               </h3>
               <div className="text-[2.2rem] tablet:text-[2.4rem] desktop:text-[3rem] font-light mb-3">
                 {favorite.currentTemp}°
