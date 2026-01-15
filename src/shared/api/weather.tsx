@@ -118,8 +118,6 @@ export const fetchWeatherData = async (
     highTemp: Math.round(data.main.temp_max),
     condition: data.weather[0].description,
     icon: getWeatherIcon(data.weather[0].icon),
-    sunrise: data.sys.sunrise,
-    sunset: data.sys.sunset,
   };
   console.log("3. Extracted weather info:", weatherData);
 

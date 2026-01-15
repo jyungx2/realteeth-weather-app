@@ -1,10 +1,5 @@
+import type { SearchContextValue } from "@/widgets/search-overlay/model/type";
 import { createContext, useContext } from "react";
-
-// Context에서 제공할 값의 타입 정의
-type SearchContextValue = {
-  isSearchOpen: boolean;
-  toggleSearch: () => void;
-};
 
 // Context 생성 (초기값은 undefined 권장)
 export const SearchContext = createContext<SearchContextValue | undefined>(

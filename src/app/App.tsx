@@ -1,15 +1,20 @@
 import router from "@/app/router/routes";
+import { useLocationModal } from "@/widgets/location-modal/model/locationContext";
+import LocationModal from "@/widgets/location-modal/ui/location-modal";
 import { useSearch } from "@/widgets/search-overlay/model/searchContext";
 import SearchForm from "@/widgets/search-overlay/ui/search-form";
 import { RouterProvider } from "react-router-dom";
 
 function App() {
-  const { isSearchOpen, toggleSearch } = useSearch();
+  const { isSearchOpen } = useSearch();
+
+  const { isModalOpen } = useLocationModal();
 
   return (
     <>
       <RouterProvider router={router} />
-      {isSearchOpen && <SearchForm onClose={toggleSearch} />}
+      {isSearchOpen && <SearchForm />}
+      {isModalOpen && <LocationModal />}
     </>
   );
 }

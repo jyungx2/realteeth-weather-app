@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { QueryProvider } from "@/app/providers/QueryProvider";
 import { SearchProvider } from "@/app/providers/SearchProvider";
+import { LocationProvider } from "@/app/providers/LocationProvider";
 
 interface AppProvidersProps {
   children: ReactNode;
@@ -9,7 +10,9 @@ interface AppProvidersProps {
 export function AppProviders({ children }: AppProvidersProps) {
   return (
     <QueryProvider>
-      <SearchProvider>{children}</SearchProvider>
+      <SearchProvider>
+        <LocationProvider>{children}</LocationProvider>
+      </SearchProvider>
     </QueryProvider>
   );
 }

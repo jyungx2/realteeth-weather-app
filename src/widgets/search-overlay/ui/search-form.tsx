@@ -1,52 +1,56 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Search, X, MapPin } from "lucide-react";
+import { parseLocationString } from "@/widgets/search-overlay/model/type";
+import koreaDistrictsData from "@/data/korea_districts.json";
+import { useLocationModal } from "@/widgets/location-modal/model/locationContext";
+import { useSearch } from "@/widgets/search-overlay/model/searchContext";
 
-interface SearchResult {
-  id: string;
-  name: string;
-  region: string;
-}
-
-interface SearchFormProps {
-  onClose: () => void;
-  onSelectLocation?: (location: SearchResult) => void;
-}
-
-export default function SearchForm({
-  onClose,
-  onSelectLocation,
-}: SearchFormProps) {
+export default function SearchForm() {
+  const { toggleSearch } = useSearch();
   const [searchQuery, setSearchQuery] = useState("");
+  const { openModal } = useLocationModal();
 
-  // 검색 결과 더미데이터
-  const allResults: SearchResult[] = [
-    { id: "1", name: "서울특별시", region: "서울" },
-    { id: "2", name: "서울특별시 성동구", region: "서울" },
-    { id: "3", name: "서구", region: "대전광역시" },
-    { id: "4", name: "서구", region: "부산광역시" },
-    { id: "5", name: "서구", region: "인천광역시" },
-  ];
+  // JSON 데이터를 SelectedLocation 형식으로 변환
+  const allLocations = useMemo(() => {
+    return koreaDistrictsData.map((location: string, i: number) => {
+      const parsed = parseLocationString(location, i);
+
+      return {
+        id: parsed.id,
+        name: parsed.displayName,
+        city: parsed.city,
+      };
+    });
+  }, []);
 
   // 검색 필터링
-  const filteredResults = searchQuery
-    ? allResults.filter(
-        (result) =>
-          result.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          result.region.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : [];
+  const filteredResults = useMemo(() => {
+    if (!searchQuery.trim()) return [];
 
-  const handleSelect = (location: SearchResult) => {
-    if (onSelectLocation) {
-      onSelectLocation(location);
-    }
-  };
+    const query = searchQuery.toLowerCase();
 
-  const handleClose = () => {
-    if (onClose) {
-      onClose();
-    }
-  };
+    return allLocations
+      .filter((location) => {
+        const name = location.name.toLowerCase();
+        const city = location.city.toLowerCase();
+
+        // 공백 제거 버전
+        const nameWithoutSpaces = name.replace(/\s/g, "");
+        const queryWithoutSpaces = query.replace(/\s/g, "");
+
+        // 부분 토큰 매칭 ("종로" → "서울특별시 종로구")
+        // location.name을 토큰으로 분리
+        const tokens = name.split(/[\s-]/); // 공백이나 하이픈으로 분리
+
+        return (
+          name.includes(query) ||
+          city.includes(query) ||
+          nameWithoutSpaces.includes(queryWithoutSpaces) ||
+          tokens.some((token) => token.includes(query))
+        );
+      })
+      .slice(0, 20); // 최대 20개만 표시
+  }, [searchQuery, allLocations]);
 
   return (
     <div className="fixed inset-0 bg-dark-overlay z-50 flex flex-col">
@@ -78,7 +82,7 @@ export default function SearchForm({
           </div>
 
           <button
-            onClick={handleClose}
+            onClick={toggleSearch}
             className="text-white text-[1.6rem] hover:text-grey transition-colors cursor-pointer"
           >
             취소
@@ -92,16 +96,16 @@ export default function SearchForm({
           filteredResults.map((result) => (
             <button
               key={result.id}
-              onClick={() => handleSelect(result)}
+              onClick={() => openModal(result)}
               className="w-full px-6 py-5 text-left hover:bg-white/5 transition-colors border-b border-dark-border"
             >
               <div className="flex items-center gap-4">
-                <MapPin size={20} className="text-grey flex-shrink-0" />
+                <MapPin size={20} className="text-grey shrink-0" />
                 <div>
                   <div className="text-white font-medium text-lg mb-1">
                     {result.name}
                   </div>
-                  <div className="text-grey text-sm">{result.region}</div>
+                  {/* <div className="text-grey text-sm">{result.fullPath}</div> */}
                 </div>
               </div>
             </button>
