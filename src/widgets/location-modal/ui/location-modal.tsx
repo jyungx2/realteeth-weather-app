@@ -95,6 +95,10 @@ export default function LocationModal() {
         closeModal();
         toggleSearch();
 
+        // 이미 favorites 페이지면 navigate X -> history stack에 중복 추가 방지
+        if (location.pathname !== "/favorites") {
+          navigate("/favorites");
+        }
         console.log("즐겨찾기에 추가:", selectedLocation.name);
       } else {
         alert("즐겨찾기 추가에 실패했습니다.");
