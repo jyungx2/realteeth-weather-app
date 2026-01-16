@@ -137,7 +137,7 @@ export const fetchWeatherData = async (
   let locationName = "현재 위치";
   try {
     const geoResponse = await fetch(
-      `http://api.openweathermap.org/geo/1.0/reverse?lat=${latitude}&lon=${longitude}&appid=${API_KEY}`
+      `https://api.openweathermap.org/geo/1.0/reverse?lat=${latitude}&lon=${longitude}&appid=${API_KEY}`
     );
     if (geoResponse.ok) {
       const geoData = await geoResponse.json();
