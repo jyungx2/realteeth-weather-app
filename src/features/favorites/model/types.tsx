@@ -14,3 +14,13 @@ export interface FavoriteWithWeather extends FavoriteLocation {
   condition?: string;
   isLoading?: boolean;
 }
+
+export interface FavoritesStore {
+  favorites: FavoriteLocation[];
+
+  // Zustand Actions
+  loadFavorites: () => void;
+  addFavorite: (location: FavoriteLocation) => void;
+  removeFavorite: (id: number) => void;
+  isFavorite: (id: number) => boolean;
+}

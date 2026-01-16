@@ -31,8 +31,3 @@ export const remove = (locationId: number): void => {
   const favorites = getAll();
   save(favorites.filter((fav) => fav.id !== locationId));
 };
-
-export const isFavorite = (locationId: number): boolean => {
-  const favorites = getAll();
-  return favorites.some((fav) => fav.id === locationId);
-};

@@ -5,9 +5,9 @@ import { fetchWeatherData } from "@/shared/api/weather";
 import type { WeatherData } from "@/shared/model/weather";
 import { geocodeLocation } from "@/shared/api/geocoding";
 import { X, MapPin } from "lucide-react";
-import { add, isFavorite, remove } from "@/features/favorites/api";
 import { useNavigate } from "react-router-dom";
 import { useSearch } from "@/widgets/search-overlay/model/searchContext";
+import { useFavoritesStore } from "@/features/favorites/model/useFavoritesStore";
 
 export default function LocationModal() {
   const { selectedLocation, isModalOpen, closeModal } = useLocationModal();
@@ -16,19 +16,27 @@ export default function LocationModal() {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isFavorited, setIsFavorited] = useState(false);
+  // const [isFavorited, setIsFavorited] = useState(false);
   const navigate = useNavigate();
   const [coords, setCoords] = useState<{
     latitude: number;
     longitude: number;
   } | null>(null);
+  const {
+    addFavorite,
+    removeFavorite,
+    isFavorite: checkIsFavorite,
+  } = useFavoritesStore();
 
+  const isFavorited = selectedLocation
+    ? checkIsFavorite(selectedLocation.id)
+    : false;
   // 현재 위치가 즐겨찾기에 있는지 확인
-  useEffect(() => {
-    if (selectedLocation) {
-      setIsFavorited(isFavorite(selectedLocation.id));
-    }
-  }, [selectedLocation]);
+  // useEffect(() => {
+  //   if (selectedLocation) {
+  //     setIsFavorited(checkIsFavorite(selectedLocation.id));
+  //   }
+  // }, [selectedLocation]);
 
   // selectedLocation이 변경되면 날씨 데이터 가져오기
   useEffect(() => {
@@ -61,18 +69,18 @@ export default function LocationModal() {
     if (!selectedLocation || !coords) return;
 
     if (isFavorited) {
-      remove(selectedLocation.id);
-      setIsFavorited(false);
+      removeFavorite(selectedLocation.id);
+
       console.log("즐겨찾기에서 제거:", selectedLocation.name);
     } else {
-      add({
+      addFavorite({
         id: selectedLocation.id,
         name: selectedLocation.name,
         city: selectedLocation.city,
         lat: coords.latitude,
         lng: coords.longitude,
       });
-      setIsFavorited(true);
+
       closeModal();
       toggleSearch();
       navigate("/favorites");
