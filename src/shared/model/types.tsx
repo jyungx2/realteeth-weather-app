@@ -11,3 +11,8 @@ export interface LocationWithCoords extends Location {
   lat: number;
   lng: number;
 }
+
+export interface Coordinates {
+  latitude: number;
+  longitude: number;
+}

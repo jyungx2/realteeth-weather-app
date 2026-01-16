@@ -3,11 +3,12 @@ import { useEffect, useState } from "react";
 import { useLocationModal } from "../model/locationContext";
 import { fetchWeatherData } from "@/shared/api/weather";
 import type { WeatherData } from "@/shared/model/weather";
-import { geocodeLocation } from "@/shared/api/geocoding";
+// import { geocodeLocation } from "@/shared/api/geocoding";
 import { X, MapPin } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSearch } from "@/widgets/search-overlay/model/searchContext";
 import { useFavoritesStore } from "@/features/favorites/model/useFavoritesStore";
+import { NgeocodeLocation } from "@/shared/api/nominatim-geocoding";
 
 export default function LocationModal() {
   const { selectedLocation, isModalOpen, closeModal } = useLocationModal();
@@ -49,7 +50,7 @@ export default function LocationModal() {
       setError(null);
 
       try {
-        const coords = await geocodeLocation(selectedLocation.name); // 주소 → 좌표 변환
+        const coords = await NgeocodeLocation(selectedLocation.name); // 주소 → 좌표 변환
         setCoords(coords); // 좌표 상태에 저장
 
         const weather = await fetchWeatherData(coords); // 좌표 → 날씨정보 GET
