@@ -58,7 +58,7 @@ export default function SearchForm() {
       <div className="bg-dark-card border-b border-dark-border px-6 py-4">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-3 bg-dark-overlay rounded-lg px-4 py-4 flex-1">
-            <Search size={20} className="text-grey flex-shrink-0" />
+            <Search size={20} className="text-grey shrink-0" />
 
             <input
               type="text"

@@ -14,8 +14,12 @@ export default function Favorites() {
   const [favoritesWithWeather, setFavoritesWithWeather] = useState<
     FavoriteWithWeather[]
   >([]);
-  const { favorites, removeFavorite } = useFavoritesStore();
+  const { favorites, removeFavorite, updateFavoriteName } = useFavoritesStore();
   const [isLoading, setIsLoading] = useState(true);
+
+  // 편집 상태 관리
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingName, setEditingName] = useState("");
 
   useEffect(() => {
     const loadFavoritesWithWeather = async () => {
@@ -54,6 +58,27 @@ export default function Favorites() {
     loadFavoritesWithWeather();
   }, [favorites]);
 
+  // 편집 모드 시작
+  const handleStartEdit = (id: number, currentName: string) => {
+    setEditingId(id);
+    setEditingName(currentName);
+  };
+
+  // 편집 저장
+  const handleSaveEdit = () => {
+    if (editingId && editingName.trim()) {
+      updateFavoriteName(editingId, editingName.trim());
+      setEditingId(null);
+      setEditingName("");
+    }
+  };
+
+  // 편집 취소
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditingName("");
+  };
+
   return (
     <Layout
       background="bg-black"
@@ -67,7 +92,7 @@ export default function Favorites() {
           즐겨찾기
         </h2>
       }
-      mainCN="pt-[4rem]"
+      mainCN="w-full pt-[4rem] overflow-x-hidden"
     >
       <div className="flex items-center gap-3 bg-dark-overlay rounded-3xl px-4 py-4 flex-1 mb-10">
         <Search size={20} className="text-grey shrink-0" />
@@ -95,7 +120,7 @@ export default function Favorites() {
       {/* 카드 그리드 */}
       <div className="grid grid-cols-1 tablet:grid-cols-2 desktop:grid-cols-3 gap-6 auto-rows-fr">
         {isLoading
-          ? // 스켈레톤 카드
+          ? // 스켈레톤 카드 (날씨정보 준비되기 전)
             favorites.map((fav) => (
               <div
                 key={fav.id}
@@ -108,50 +133,102 @@ export default function Favorites() {
                 </div>
               </div>
             ))
-          : // 실제 카드
+          : // 실제 카드 (실시간 날씨 api 연동 후)
             favoritesWithWeather.map((favorite) => (
               <div
                 key={favorite.id}
-                className="relative bg-dark-card/90 rounded-3xl p-6 tablet:p-[2.2rem] desktop:p-[2.4rem] text-white hover:bg-dark-card transition-colors cursor-pointer"
-                onClick={() => navigate("/detail", { state: { favorite } })}
+                className={`relative bg-dark-card/90 rounded-3xl p-6 tablet:p-[2.2rem] desktop:p-[2.4rem] text-white hover:bg-dark-card transition-colors min-w-[280px] ${
+                  editingId === favorite.id
+                    ? "cursor-default"
+                    : "cursor-pointer"
+                }`}
+                onClick={
+                  editingId === favorite.id
+                    ? undefined
+                    : () => navigate("/detail", { state: { favorite } })
+                }
               >
-                {/* 삭제 버튼 */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removeFavorite(favorite.id);
-                  }}
-                  className="absolute top-4 right-4 p-3 hover:bg-white/10 rounded-full transition-colors"
-                  aria-label="삭제"
-                >
-                  <img src="/bin.svg" alt="삭제" className="w-8" />
-                </button>
+                {/* 제목 영역 - Flexbox로 버튼과 함께 배치 */}
+                <div className="flex items-center justify-between gap-2 mb-4 min-w-0">
+                  {editingId === favorite.id ? (
+                    <input
+                      type="text"
+                      value={editingName}
+                      onChange={(e) => setEditingName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          handleSaveEdit();
+                        } else if (e.key === "Escape") {
+                          handleCancelEdit();
+                        }
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                      className="w-[60%] min-w-0 bg-dark-overlay text-white text-[1.6rem] tablet:text-[2.4rem] desktop:text-[2.6rem] font-medium px-2 py-1.5 tablet:px-3 tablet:py-2 rounded-lg outline-none focus:ring-1 focus:ring-primary"
+                      autoFocus
+                    />
+                  ) : (
+                    <h3 className="flex-1 min-w-0 text-[2rem] tablet:text-[2.4rem] desktop:text-[2.6rem] font-medium break-words">
+                      {
+                        favorite.name.split(" ")[
+                          favorite.name.split(" ").length - 1
+                        ]
+                      }
+                    </h3>
+                  )}
 
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                  }}
-                  className="absolute top-4 right-18 p-3 hover:bg-white/10 rounded-full transition-colors"
-                  aria-label="수정"
-                >
-                  <img src="/pencil.svg" alt="수정" className="w-8" />
-                </button>
+                  {/* 버튼 그룹 */}
+                  <div className="flex items-center gap-3 shrink-0">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (editingId === favorite.id) {
+                          handleSaveEdit();
+                        } else {
+                          handleStartEdit(
+                            favorite.id,
+                            favorite.name.split(" ")[
+                              favorite.name.split(" ").length - 1
+                            ]
+                          );
+                        }
+                      }}
+                      className="p-1.5 tablet:p-2 hover:bg-white/10 rounded-full transition-colors"
+                      aria-label="수정"
+                    >
+                      <img
+                        src={
+                          editingId === favorite.id
+                            ? "/check.svg"
+                            : "/pencil.svg"
+                        }
+                        alt={editingId === favorite.id ? "저장" : "수정"}
+                        className="w-10 tablet:w-9 desktop:w-10"
+                      />
+                    </button>
 
-                {/* 카드 내용 */}
-                <div className="pr-10">
-                  <h3 className="text-[2rem] tablet:text-[2.4rem] desktop:text-[2.6rem] font-medium mb-4">
-                    {
-                      favorite.name.split(" ")[
-                        favorite.name.split(" ").length - 1
-                      ]
-                    }
-                  </h3>
-                  <div className="text-[2.2rem] tablet:text-[2.4rem] desktop:text-[3rem] font-light mb-3">
-                    {favorite.currentTemp}°
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeFavorite(favorite.id);
+                      }}
+                      className="p-1.5 tablet:p-2 hover:bg-white/10 rounded-full transition-colors"
+                      aria-label="삭제"
+                    >
+                      <img
+                        src="/bin.svg"
+                        alt="삭제"
+                        className="w-10 tablet:w-9 desktop:w-10"
+                      />
+                    </button>
                   </div>
-                  <div className="text-[1.2rem] tablet:text-[1.4rem] desktop:text-[1.8rem] text-grey">
-                    최고: {favorite.highTemp}° 최저: {favorite.lowTemp}°
-                  </div>
+                </div>
+
+                {/* 온도 정보 */}
+                <div className="text-[2.2rem] tablet:text-[2.4rem] desktop:text-[3rem] font-light mb-3">
+                  {favorite.currentTemp}°
+                </div>
+                <div className="text-[1.2rem] tablet:text-[1.4rem] desktop:text-[1.8rem] text-grey">
+                  최고: {favorite.highTemp}° 최저: {favorite.lowTemp}°
                 </div>
               </div>
             ))}

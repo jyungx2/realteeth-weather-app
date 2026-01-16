@@ -1,8 +1,8 @@
-import type { FavoriteLocation } from "@/features/favorites/model/types";
+import type { LocationWithCoords } from "@/shared/model/types";
 
 const STORAGE_KEY = "favoriteLocations";
 
-export const getAll = (): FavoriteLocation[] => {
+export const getAll = (): LocationWithCoords[] => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     return stored ? JSON.parse(stored) : [];
@@ -12,7 +12,7 @@ export const getAll = (): FavoriteLocation[] => {
   }
 };
 
-export const save = (favorites: FavoriteLocation[]): void => {
+export const save = (favorites: LocationWithCoords[]): void => {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(favorites));
   } catch (error) {
@@ -20,14 +20,32 @@ export const save = (favorites: FavoriteLocation[]): void => {
   }
 };
 
-export const add = (location: FavoriteLocation): void => {
+export const add = (location: LocationWithCoords): boolean => {
   const favorites = getAll();
-  if (!favorites.some((fav) => fav.id === location.id)) {
-    save([...favorites, location]);
+
+  // 6개 제한 체크
+  if (favorites.length >= 6) {
+    return false;
   }
+
+  // 중복 체크
+  if (favorites.some((fav) => fav.id === location.id)) {
+    return false;
+  }
+
+  save([...favorites, location]);
+  return true;
 };
 
 export const remove = (locationId: number): void => {
   const favorites = getAll();
   save(favorites.filter((fav) => fav.id !== locationId));
+};
+
+export const update = (locationId: number, newName: string): void => {
+  const favorites = getAll();
+  const updated = favorites.map((fav) =>
+    fav.id === locationId ? { ...fav, name: newName } : fav
+  );
+  save(updated);
 };

@@ -1,4 +1,7 @@
-const KAKAO_API_KEY = import.meta.env.VITE_KAKAO_REST_API_KEY;
+const KAKAO_API_KEY =
+  import.meta.env.MODE === "production"
+    ? import.meta.env.VITE_KAKAO_PROD_API_KEY // 실제 앱 키
+    : import.meta.env.VITE_KAKAO_TEST_API_KEY; // 테스트 앱 키
 
 export interface Coordinates {
   latitude: number;
@@ -6,8 +9,17 @@ export interface Coordinates {
 }
 
 /**
- * Kakao Local API를 사용한 한국 주소 geocoding
+ * Kakao Local API를 사용한 한국 주소 geocoding(주소 -> 좌표 변환)
  * OpenWeather는 도시 레벨만 지원하므로 Kakao 사용 필수!
+
+EX) OpenWeather: 구/동이 달라도 모두 같은 "서울" 좌표 반환 ❌
+ - "서울특별시 종로구 청와대로 1" → OpenWeather: 서울 (37.5665, 126.9780)
+ - "서울특별시 강남구 테헤란로 152" → OpenWeather: 서울 (37.5665, 126.9780)
+
+
+EX) Kakao Local API: 상세 주소까지 정확한 좌표 제공 ✅
+ - "서울특별시 종로구 청와대로 1" → (37.5867, 126.9748)
+ - "서울특별시 강남구 테헤란로 152" → (37.5048, 127.0493)
  */
 export async function geocodeLocation(address: string): Promise<Coordinates> {
   try {

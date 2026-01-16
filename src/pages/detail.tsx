@@ -34,7 +34,7 @@ export default function Detail() {
       </div>
 
       {/* 시간대별 날씨 카드 */}
-      <div className="bg-white/20 backdrop-blur-md rounded-3xl p-6 text-white mx-auto w-[296px] mobile:w-[360px] tablet:w-[640px] desktop:w-[800px] flex flex-col gap-4">
+      <div className="bg-white/20 backdrop-blur-md rounded-3xl p-6 text-white mx-auto mobile:w-[310px] tablet:w-[640px] desktop:w-[800px] flex flex-col gap-4">
         <p className="text-[1.4rem] mb-6 opacity-90">
           낮은 체감 온도입니다. 따뜻한 옷을 챙겨 입으세요.
         </p>

@@ -82,11 +82,6 @@ export default function Home() {
   return (
     <Layout
       background="bg-sunny"
-      leftSlot={
-        <button className="cursor-pointer">
-          <img src="/menu.svg" alt="메뉴" />
-        </button>
-      }
       rightSlot={
         <div className="right-section flex gap-14">
           <button className="cursor-pointer" onClick={() => toggleSearch()}>

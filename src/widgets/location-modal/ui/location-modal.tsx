@@ -5,7 +5,7 @@ import { fetchWeatherData } from "@/shared/api/weather";
 import type { WeatherData } from "@/shared/model/weather";
 import { geocodeLocation } from "@/shared/api/geocoding";
 import { X, MapPin } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useSearch } from "@/widgets/search-overlay/model/searchContext";
 import { useFavoritesStore } from "@/features/favorites/model/useFavoritesStore";
 
@@ -18,11 +18,13 @@ export default function LocationModal() {
   const [error, setError] = useState<string | null>(null);
   // const [isFavorited, setIsFavorited] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const [coords, setCoords] = useState<{
     latitude: number;
     longitude: number;
   } | null>(null);
   const {
+    favorites,
     addFavorite,
     removeFavorite,
     isFavorite: checkIsFavorite,
@@ -70,10 +72,16 @@ export default function LocationModal() {
 
     if (isFavorited) {
       removeFavorite(selectedLocation.id);
-
+      alert("즐겨찾기에서 제거되었습니다.");
       console.log("즐겨찾기에서 제거:", selectedLocation.name);
     } else {
-      addFavorite({
+      if (favorites.length >= 6) {
+        alert("즐겨찾기는 최대 6개까지 추가할 수 있습니다.");
+        return;
+      }
+
+      // 추가 시도
+      const success = addFavorite({
         id: selectedLocation.id,
         name: selectedLocation.name,
         city: selectedLocation.city,
@@ -81,10 +89,16 @@ export default function LocationModal() {
         lng: coords.longitude,
       });
 
-      closeModal();
-      toggleSearch();
-      navigate("/favorites");
-      console.log("즐겨찾기에 추가:", selectedLocation.name);
+      // 성공한 경우에만 이동
+      if (success) {
+        alert("즐겨찾기에 추가되었습니다.");
+        closeModal();
+        toggleSearch();
+
+        console.log("즐겨찾기에 추가:", selectedLocation.name);
+      } else {
+        alert("즐겨찾기 추가에 실패했습니다.");
+      }
     }
   };
 
@@ -146,7 +160,7 @@ export default function LocationModal() {
           {weatherData && !isLoading && (
             <div className="space-y-6">
               {/* 현재 날씨 - 메인 카드 */}
-              <div className="bg-gradient-to-br from-primary/20 to-primary/5 rounded-3xl p-8 text-center border border-primary/10">
+              <div className="bg-linear-to-br from-primary/20 to-primary/5 rounded-3xl p-8 text-center border border-primary/10">
                 <div className="flex flex-col items-center gap-4">
                   {/* 위치 정보 */}
                   <div className="flex items-center justify-center gap-2 text-grey">
