@@ -30,12 +30,8 @@ export async function geocodeLocation(address: string): Promise<Coordinates> {
       );
     }
 
-    console.log("🔍 API Key loaded:", KAKAO_API_KEY ? "✅ 있음" : "❌ 없음");
-
     // 하이픈이나 공백 정리
     const query = address.replace(/-/g, " ").trim();
-
-    console.log("🔍 Kakao Geocoding:", query);
 
     const response = await fetch(
       `https://dapi.kakao.com/v2/local/search/address.json?query=${encodeURIComponent(
@@ -48,9 +44,6 @@ export async function geocodeLocation(address: string): Promise<Coordinates> {
         },
       }
     );
-
-    console.log("📡 Response Status:", response.status);
-
     if (!response.ok) {
       const errorData = await response.text();
       console.error("❌ Kakao API Error Response:", errorData);
@@ -58,8 +51,6 @@ export async function geocodeLocation(address: string): Promise<Coordinates> {
     }
 
     const data = await response.json();
-    console.log("📡 Kakao API Response Data:", data);
-
     if (!data.documents || data.documents.length === 0) {
       throw new Error(`주소를 찾을 수 없습니다: ${address}`);
     }

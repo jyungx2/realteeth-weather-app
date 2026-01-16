@@ -6,7 +6,6 @@ export default function Detail() {
   const navigate = useNavigate();
   const location = useLocation();
   const favorite = location.state?.favorite;
-  console.log("Detail page favorite:", favorite);
 
   return (
     <Layout

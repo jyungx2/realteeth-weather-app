@@ -1,8 +1,8 @@
-import type { SelectedLocation } from "@/widgets/search-overlay/model/type";
+import type { Location } from "@/shared/model/types";
 
 export interface LocationContextValue {
   isModalOpen: boolean;
-  selectedLocation: SelectedLocation | null;
-  openModal: (location: SelectedLocation) => void;
+  selectedLocation: Location | null;
+  openModal: (location: Location) => void;
   closeModal: () => void;
 }

@@ -47,7 +47,6 @@ export default function LocationModal() {
     const loadWeatherData = async () => {
       setIsLoading(true);
       setError(null);
-      console.log("🌤️Loading weather for location:", selectedLocation);
 
       try {
         const coords = await geocodeLocation(selectedLocation.name); // 주소 → 좌표 변환
@@ -73,7 +72,6 @@ export default function LocationModal() {
     if (isFavorited) {
       removeFavorite(selectedLocation.id);
       alert("즐겨찾기에서 제거되었습니다.");
-      console.log("즐겨찾기에서 제거:", selectedLocation.name);
     } else {
       if (favorites.length >= 6) {
         alert("즐겨찾기는 최대 6개까지 추가할 수 있습니다.");
@@ -99,7 +97,6 @@ export default function LocationModal() {
         if (location.pathname !== "/favorites") {
           navigate("/favorites");
         }
-        console.log("즐겨찾기에 추가:", selectedLocation.name);
       } else {
         alert("즐겨찾기 추가에 실패했습니다.");
       }
