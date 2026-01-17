@@ -1,5 +1,5 @@
 // widgets/location-modal/ui/LocationModal.tsx
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocationModal } from "../model/locationContext";
 import { fetchWeatherData } from "@/shared/api/weather";
 import type { WeatherData } from "@/shared/model/weather";
@@ -9,6 +9,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useSearch } from "@/widgets/search-overlay/model/searchContext";
 import { useFavoritesStore } from "@/features/favorites/model/useFavoritesStore";
 import { NgeocodeLocation } from "@/shared/api/nominatim-geocoding";
+import toast from "react-hot-toast";
 
 export default function LocationModal() {
   const { selectedLocation, isModalOpen, closeModal } = useLocationModal();
@@ -16,7 +17,6 @@ export default function LocationModal() {
   // Modal 내부에서 날씨 데이터 관리
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   // const [isFavorited, setIsFavorited] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -30,6 +30,7 @@ export default function LocationModal() {
     removeFavorite,
     isFavorite: checkIsFavorite,
   } = useFavoritesStore();
+  const toastShownRef = useRef(false); // stirct mode로 인한 중복 토스트 방지용 (리렌더링 없이 상태 공유)
 
   const isFavorited = selectedLocation
     ? checkIsFavorite(selectedLocation.id)
@@ -47,7 +48,7 @@ export default function LocationModal() {
 
     const loadWeatherData = async () => {
       setIsLoading(true);
-      setError(null);
+      toastShownRef.current = false;
 
       try {
         const coords = await NgeocodeLocation(selectedLocation.name); // 주소 → 좌표 변환
@@ -55,9 +56,25 @@ export default function LocationModal() {
 
         const weather = await fetchWeatherData(coords); // 좌표 → 날씨정보 GET
         setWeatherData(weather); // 로컬 상태에 저장
-      } catch (err) {
-        console.error("Failed to load weather:", err);
-        setError("날씨 정보를 불러오는데 실패했습니다.");
+      } catch {
+        if (!toastShownRef.current) {
+          toastShownRef.current = true; // 토스트 표시했다고 기록
+
+          toast.error("해당 장소의 정보가 제공되지 않습니다.", {
+            duration: 3000,
+            position: "top-center",
+            style: {
+              background: "#EF4444",
+              color: "#fff",
+              padding: "18px",
+              borderRadius: "12px",
+              fontSize: "14px",
+            },
+            icon: "⚠️",
+          });
+
+          closeModal();
+        }
       } finally {
         setIsLoading(false);
       }
@@ -146,15 +163,8 @@ export default function LocationModal() {
             <div className="flex flex-col items-center justify-center pt-50">
               <div className="animate-spin rounded-full h-20 w-20 border-2 border-primary border-t-transparent mb-6" />
               <p className="text-grey mt-4 text-[1.8rem]">
-                날씨 정보를 불러오는 중...
+                날씨 정보를 불러오고 있어요!
               </p>
-            </div>
-          )}
-
-          {/* 에러 상태 */}
-          {error && !isLoading && (
-            <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-2xl">
-              <p className="text-red-400 text-center">{error}</p>
             </div>
           )}
 

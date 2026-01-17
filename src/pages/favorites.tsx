@@ -118,7 +118,7 @@ export default function Favorites() {
         </button>
       </div>
       {/* 카드 그리드 */}
-      <div className="grid grid-cols-1 tablet:grid-cols-2 desktop:grid-cols-3 gap-6 auto-rows-fr">
+      <div className="grid grid-cols-1 tablet:grid-cols-2 desktop:grid-cols-3 gap-6 auto-rows-fr mb-10">
         {isLoading
           ? // 스켈레톤 카드 (날씨정보 준비되기 전)
             favorites.map((fav) => (
@@ -137,7 +137,7 @@ export default function Favorites() {
             favoritesWithWeather.map((favorite) => (
               <div
                 key={favorite.id}
-                className={`relative bg-dark-card/90 rounded-3xl p-6 tablet:p-[2.2rem] desktop:p-[2.4rem] text-white hover:bg-dark-card transition-colors min-w-[280px] ${
+                className={`mb-2 relative bg-dark-card/90 rounded-3xl p-6 tablet:p-[2.2rem] desktop:p-[2.4rem] text-white hover:bg-dark-card transition-colors min-w-[280px] ${
                   editingId === favorite.id
                     ? "cursor-default"
                     : "cursor-pointer"

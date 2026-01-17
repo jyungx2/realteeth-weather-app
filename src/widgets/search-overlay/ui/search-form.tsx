@@ -83,7 +83,7 @@ export default function SearchForm() {
 
           <button
             onClick={toggleSearch}
-            className="text-white text-[1.6rem] hover:text-grey transition-colors cursor-pointer"
+            className="text-white text-[1.6rem] hover:text-grey transition-colors cursor-pointer shrink-0"
           >
             취소
           </button>

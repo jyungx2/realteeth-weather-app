@@ -21,7 +21,7 @@ export default function Home() {
           <p className="text-xl">
             {error instanceof Error
               ? error.message
-              : "날씨 정보를 불러올 수 없습니다."}
+              : "해당 장소의 정보가 제공되지 않습니다."}
           </p>
           <button
             onClick={() => refetch()}
