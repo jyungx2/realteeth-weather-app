@@ -51,7 +51,7 @@ export default function Detail() {
                   <div className="text-4xl">{hour.icon}</div>
                   <span className="text-xl font-medium">{hour.temp}°</span>
                 </div>
-              )
+              ),
             )}
           </div>
         </div>

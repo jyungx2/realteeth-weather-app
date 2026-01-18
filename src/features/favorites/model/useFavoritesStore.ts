@@ -8,17 +8,9 @@
 //  1. perist의 set()만 호출하면 persist가 자동으로 localStorage 저장
 //  2. 새로고침 시 persist가 자동으로 localStorage에서 복원 => api.tsx 불필요!
 
+import type { FavoritesStore } from "@/features/favorites/model/types";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import type { LocationWithCoords } from "@/shared/model/types";
-
-interface FavoritesStore {
-  favorites: LocationWithCoords[];
-  addFavorite: (location: LocationWithCoords) => boolean;
-  removeFavorite: (id: number) => void;
-  updateFavoriteName: (id: number, newName: string) => void;
-  isFavorite: (id: number) => boolean;
-}
 
 export const useFavoritesStore = create<FavoritesStore>()(
   persist(

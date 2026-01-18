@@ -1,3 +1,8 @@
+export interface Coordinates {
+  latitude: number;
+  longitude: number;
+}
+
 // 기본 위치 정보 (검색 결과) -> SearchForm에서 사용
 export interface Location {
   id: number;
@@ -10,9 +15,4 @@ export interface Location {
 export interface LocationWithCoords extends Location {
   lat: number;
   lng: number;
-}
-
-export interface Coordinates {
-  latitude: number;
-  longitude: number;
 }

@@ -1,4 +1,4 @@
-import type { Location } from "@/shared/model/types";
+import type { Location } from "@/shared/model/location";
 
 export interface LocationContextValue {
   isModalOpen: boolean;

@@ -1,4 +1,4 @@
-import type { Coordinates } from "@/shared/model/types";
+import type { Coordinates } from "@/shared/model/location";
 
 /*
  * Nominatim (OpenStreetMap) Geocoding API
@@ -25,7 +25,7 @@ export async function NgeocodeLocation(address: string): Promise<Coordinates> {
           "User-Agent": "WeatherApp/1.0 (Weather forecast application)", // 필수!
           "Accept-Language": "ko", // 한국어 우선
         },
-      }
+      },
     );
 
     if (!response.ok) {
@@ -60,7 +60,7 @@ export async function NgeocodeLocation(address: string): Promise<Coordinates> {
     throw new Error(
       error instanceof Error
         ? error.message
-        : "위치 정보를 가져오는데 실패했습니다."
+        : "위치 정보를 가져오는데 실패했습니다.",
     );
   }
 }

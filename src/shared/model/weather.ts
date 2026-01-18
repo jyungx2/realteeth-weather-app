@@ -1,8 +1,3 @@
-export interface Coordinates {
-  latitude: number;
-  longitude: number;
-}
-
 export interface HourlyForecast {
   time: string;
   temp: number;

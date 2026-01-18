@@ -1,4 +1,4 @@
-import type { LocationWithCoords } from "@/shared/model/types";
+import type { LocationWithCoords } from "@/shared/model/location";
 
 // 즐겨찾기 + 날씨 데이터
 export interface FavoriteWithWeather extends LocationWithCoords {

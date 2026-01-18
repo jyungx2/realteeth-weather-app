@@ -1,4 +1,4 @@
-import type { Location } from "@/shared/model/types";
+import type { Location } from "@/shared/model/location";
 import { LocationContext } from "@/widgets/location-modal/model/locationContext";
 
 import { useState, type ReactNode } from "react";
