@@ -10,7 +10,7 @@ export default function Layout({
   mainCN,
 }: LayoutProps) {
   return (
-    <div className={`min-h-screen ${background} px-[2.4rem]`}>
+    <div className={`min-h-screen flex flex-col ${background} px-[2.4rem]`}>
       <Header
         leftSlot={leftSlot}
         middleSlot={middleSlot}

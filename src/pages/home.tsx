@@ -33,25 +33,20 @@ export default function Home() {
       );
     }
 
-    if (!weatherData) {
-      return null;
-    }
-
-    // 정상 날씨 UI
     return (
       <>
         {/* 현재 날씨 */}
         <div className="flex flex-col gap-8 text-center text-white mb-12">
           <h1 className="text-[1.4rem] mobile:text-[2rem] tablet:text-[3rem] desktop:text-[4rem] font-light mb-4 opacity-90">
-            {weatherData.location}
+            {weatherData?.location}
           </h1>
           <div className="text-8xl font-extralight mb-6">
-            {weatherData.currentTemp}°
+            {weatherData?.currentTemp}°
           </div>
-          <p className="mb-3 opacity-90">{weatherData.condition}</p>
+          <p className="mb-3 opacity-90">{weatherData?.condition}</p>
           <div className="opacity-75">
-            <span>최고:{weatherData.highTemp}°</span>
-            <span className="ml-4">최저:{weatherData.lowTemp}°</span>
+            <span>최고:{weatherData?.highTemp}°</span>
+            <span className="ml-4">최저:{weatherData?.lowTemp}°</span>
           </div>
         </div>
 

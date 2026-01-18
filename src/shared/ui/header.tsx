@@ -1,10 +1,4 @@
-import type { ReactNode } from "react";
-
-interface HeaderProps {
-  leftSlot?: ReactNode;
-  middleSlot?: ReactNode;
-  rightSlot?: ReactNode;
-}
+import type { HeaderProps } from "@/shared/model/header";
 
 export default function Header({
   leftSlot,
