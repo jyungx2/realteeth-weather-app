@@ -56,7 +56,7 @@ export default function SearchForm() {
     <div className="fixed inset-0 bg-dark-overlay z-50 flex flex-col">
       {/* 검색 헤더 */}
       <div className="bg-dark-card border-b border-dark-border px-6 py-4">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-6 px-2">
           <div className="flex items-center gap-3 bg-dark-overlay rounded-lg px-4 py-4 flex-1">
             <Search size={20} className="text-grey shrink-0" />
 

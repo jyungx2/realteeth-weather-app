@@ -9,7 +9,7 @@ export function LocationProvider({ children }: { children: ReactNode }) {
 
   // 데이터 전달 수단
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(
-    null
+    null,
   );
 
   // UI 제어 함수
@@ -22,9 +22,6 @@ export function LocationProvider({ children }: { children: ReactNode }) {
     setIsModalOpen(false); // 모달 닫기
     setTimeout(() => setSelectedLocation(null), 300); // 정리
   };
-
-  // ❌ 여기서 API 호출 안 함!
-  // ❌ geocoding, fetchWeather 등 비즈니스 로직 없음!
 
   return (
     <LocationContext.Provider

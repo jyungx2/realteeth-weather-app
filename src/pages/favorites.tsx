@@ -51,12 +51,14 @@ export default function Favorites() {
       });
 
       const results = await Promise.all(weatherPromises);
+
+      // 로컬 상태 업데이트 = 사이드 이펙트
       setFavoritesWithWeather(results);
       setIsLoading(false);
     };
 
     loadFavoritesWithWeather();
-  }, [favorites]);
+  }, [favorites]); // 즐겨찾기 목록이 바뀔 때(추가/삭제/이름 변경) 새로 페치해서 favoritesWithWeather 갱신 / 만약에 넣지 않으면 해당 effect는 마운트 시 한 번만 실행되고 이후 변경사항 반영 안 됨
 
   // 편집 모드 시작
   const handleStartEdit = (id: number, currentName: string) => {
@@ -188,7 +190,7 @@ export default function Favorites() {
                             favorite.id,
                             favorite.name.split(" ")[
                               favorite.name.split(" ").length - 1
-                            ]
+                            ],
                           );
                         }
                       }}
@@ -209,6 +211,7 @@ export default function Favorites() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
+                        alert("즐겨찾기에서 삭제되었습니다.");
                         removeFavorite(favorite.id);
                       }}
                       className="p-1.5 tablet:p-2 hover:bg-white/10 rounded-full transition-colors"

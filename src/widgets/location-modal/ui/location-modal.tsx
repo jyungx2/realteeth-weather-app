@@ -96,7 +96,6 @@ export default function LocationModal() {
         return;
       }
 
-      // 추가 시도
       const success = addFavorite({
         id: selectedLocation.id,
         name: selectedLocation.name,
@@ -105,7 +104,6 @@ export default function LocationModal() {
         lng: coords.longitude,
       });
 
-      // 성공한 경우에만 이동
       if (success) {
         alert("즐겨찾기에 추가되었습니다.");
         closeModal();

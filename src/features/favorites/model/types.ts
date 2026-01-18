@@ -21,7 +21,6 @@ export interface FavoritesStore {
   favorites: LocationWithCoords[]; // 실시간 날씨데이터는 포함하지 않는 위치+좌표 데이터 (localStorage와 동기화)
 
   // Zustand Actions
-  loadFavorites: () => void;
   addFavorite: (location: LocationWithCoords) => boolean;
   removeFavorite: (id: number) => void;
   updateFavoriteName: (id: number, newName: string) => void;
