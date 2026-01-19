@@ -39,36 +39,36 @@ npm run preview
 ---
 
 ## 2. 구현한 기능에 대한 설명
-### 🔹 페이지 (/pages)
-**[1] 홈페이지(‘/‘)**
+### 🔹 페이지 ('/pages')
+**[1] 홈페이지(‘/')**
   - 검색 기능: 원하는 지역에 대한 날씨 정보 조회 가능 -> 즐겨찾기 추가 가능
   - 즐겨찾기 추가 시, 즐겨찾기 페이지로 이동
   - 이미 즐겨찾기에 추가된 지역의 경우, ‘추가’ 버튼 대신 ‘제거’ 버튼 표시
  
- #### 🧩 구현 로직
+ #### 🧩 공공 API(openWeatherMap) 기반의 현재 위치 날씨 조회 구현 로직
   * 파일 경로: src/features/weather/useCurrentWeather.tsx
    1) 브라우저 내장 API (navigator.geolocation.getCurrentPosition)을 통해 현재 위치에 대한 좌표를 받아옴
       - 📁 src/shared/api/getCurrentPosition.ts
-   3) 좌표를 기반으로 openWeatherMap API을 이용해 현재 날씨 정보, 시간대별(3시간 간격) 날씨 정보, 좌표를 지역으로 변환하는 역지오코딩 API를 이용해 반환
+   2) 좌표를 기반으로 openWeatherMap API을 이용해 현재 날씨 정보, 시간대별(3시간 간격) 날씨 정보, 좌표를 지역으로 변환하는 역지오코딩 API를 이용해 반환
+      > ❗️ 1시간 간격 날씨 정보는 유료 플랜에서만 제공되어, 무료로 제공되는 3시간 간격 예보 데이터를 활용했습니다.
       - 📁 src/shared/api/fetchWeather.ts
 
 ---
 
-**[2] 즐겨찾기 페이지(/favorites)**
+**[2] 즐겨찾기 페이지('/favorites')**
   - 홈페이지와 동일하게 검색 기능 사용 가능
   - 연필 버튼을 통해 장소(지역) 이름 수정 가능
   - 휴지통 버튼을 통해 삭제 가능
   - 즐겨찾기 카드 클릭 시, 상세 페이지로 이동
 
-#### 🧩 구현 로직
-  * 파일 경로: src/features/weather/useCurrentWeather.tsx
+#### 🧩 공공 API(openWeatherMap) 기반의 즐겨찾기 장소의 날씨 조회 구현 로직
   1) 즐겨찾기 상태는 location-modal 컴포넌트와 favorites 페이지에서 사용되므로 Zustand 전역 상태 라이브러리를 이용해 관리했습니다.
-  2) 즐겨찾기 상태값은 위치 정보(id/name/city/lat/lng)만 포함한 객체 데이터로, 날씨 데이터는 실시간으로 받아와 반영해야 하기 때문에 즐겨찾기 상태에 포함하지 않고, useQuery로 데이터를 요청하는 훅을 만들어 임포트하여 사용했습니다.
+  2) 즐겨찾기 상태값은 위치 정보(id/name/city/lat/lng)만 포함한 객체 데이터로, 날씨 데이터는 실시간으로 받아와 반영해야 하기 때문에 즐겨찾기 상태에 포함하지 않고, useQueries로 여러 즐겨찾기 항목의 날씨 데이터를 병렬로 요청하는 훅을 만들어 임포트하여 사용했습니다.
      - 📁 src/features/weather/useFavoritesWeather.ts
 
 ---
 
-**[3] 상세 페이지(/detail)**
+**[3] 상세 페이지('/detail')**
   - 즐겨찾기 페이지에서 navigate의 state 속성으로 날씨 데이터를 포함한 즐겨찾기 상태를 보낸 후, useLocation으로 값을 추출해 렌더링
   - 홈페이지와 동일한 UI로 날씨 정보 조회 가능
 
@@ -191,12 +191,12 @@ UI 토글 상태는 별도의 비즈니스 로직이 필요 없고 LocalStorage�
     
 ## 선택 이유
 ### 1. 스타일링 관리 최소화
-> **🖍️ 문제 상황**
+#### **🖍️ 문제 상황**
 전역 오버레이/모달을 각 페이지 컴포넌트 내부에서 렌더링하면:
 * z-index 값 관리가 복잡해짐
 * 페이지별로 다른 stacking context에 갇힐 위험 O
-
-> **📝 해결 방법**
+  
+#### **📝 해결 방법**
 RootLayout에서 DOM 순서로 레이어를 관리하면: 
 ```ts
 import { Outlet } from "react-router-dom";
@@ -219,26 +219,26 @@ export default function RootLayout() {
 * 페이지 CSS와 완전히 독립적
 
 ⠀
-### 2. Zustand가 아닌 Context를 선택한 이유
-> **Zustand vs Context 선택 기준**
+### 2. Zustand가 아닌 Context를 선택한 이유  
+**[Zustand vs Context 선택 기준]**
 
-**Context가 적합한 경우 (검색/위치 모달):**
+📌 Context가 적합한 경우:
 - 단순 UI 토글 (boolean 상태 + 열기/닫기 함수)
 - 일시적 상태 (새로고침 시 초기화 OK)
 - 사용 범위 제한 필요 (특정 레이아웃 내부만)
 
-**Zustand가 적합한 경우 (즐겨찾기):**
+📌 Zustand가 적합한 경우:
 - 복잡한 상태 관리 (배열 + CRUD 로직)
 - 영속적 상태 (localStorage 동기화 필요)
 - 앱 전체에서 접근 필요
 
-따라서 해당 프로젝트에서는 다음과 같이 판단하여 적용했습니다.
+위의 기준을 바탕으로 해당 프로젝트에서는 다음과 같이 적용했습니다.
 - **모달/오버레이**: boolean 상태 1개 + 토글 함수만 필요 → Context로 충분 
 - **즐겨찾기 관리**: 배열 상태 + CRUD 로직 + 로컬 스토리지 동기화 → Zustand 활용
 
 ---
 
-> **✏️ 검색 오버레이(SearchForm)와 위치 모달(LocationModal)의 특성:**
+#### ✏️ 검색 오버레이(SearchForm)와 위치 모달(LocationModal)의 특성:
 - ****단순한 UI 토글 상태**** (open/close, selected item) 
   - 복잡한 비즈니스 로직이나 파생 상태 계산 없음 
   - 상태 업데이트 로직이 단순함 (토글, 선택) 
