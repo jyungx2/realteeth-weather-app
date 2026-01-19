@@ -1,4 +1,3 @@
-// /*
 // // ⛔️ useFavoritesStore.ts에서 zustand의 persist 미들웨어를 사용하면서 불필요해진 파일
 
 // // 원래는 localStorage 읽기/쓰기(getItem/setItem)를 여기서 직접 관리했는데, persist를 쓰면 set()만 호출해도 자동으로 localStorage에 저장되고 새로고침할 때도 자동 복원됨. => 이 파일의 getAll(), save() 같은 함수들을 수동으로 호출할 필요가 없어짐.
@@ -6,7 +5,6 @@
 // // 예를 들어 즐겨찾기 추가할 때 이전엔 add() 호출하고 다시 getAll()로 읽어와서 Zustand 상태를 동기화하는 2단계 필요했는데, 지금은 그냥 set({ favorites: [...favorites, location] }) 한 줄이면 persist가 localStorage 저장까지 다 처리함.
 
 // // 📍 코드만 확인하시려면 해당 파일 전체 선택(cmd+A) 후 cmd+/ 눌러주세요.
-// *
 
 // import type { LocationWithCoords } from "@/shared/model/types";
 

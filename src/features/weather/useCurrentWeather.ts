@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { getCurrentPosition, fetchWeatherData } from "@/shared/api/weather";
+import { fetchWeatherData } from "@/shared/api/fetchWeather";
 import type { Coordinates } from "@/shared/model/location";
+import { getCurrentPosition } from "@/shared/api/getCurrentPosition";
 
-export const useWeather = () => {
+export const useCurrentWeather = () => {
   // 위치 정보 가져오기
   const locationQuery = useQuery({
     queryKey: ["location"],

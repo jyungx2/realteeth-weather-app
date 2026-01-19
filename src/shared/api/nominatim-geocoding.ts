@@ -3,7 +3,7 @@ import type { Coordinates } from "@/shared/model/location";
 /*
  * Nominatim (OpenStreetMap) Geocoding API
  */
-export async function NgeocodeLocation(address: string): Promise<Coordinates> {
+export async function geocodeLocation(address: string): Promise<Coordinates> {
   try {
     const query = address.trim();
 

@@ -1,64 +1,21 @@
 import Layout from "@/widgets/layout/ui";
 import { useSearch } from "@/widgets/search-overlay/model/searchContext";
 import { Search, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import type { FavoriteWithWeather } from "@/features/favorites/model/types";
-import { fetchWeatherData } from "@/shared/api/weather";
 import { useFavoritesStore } from "@/features/favorites/model/useFavoritesStore";
+import { useFavoritesWeather } from "@/features/weather/useFavoritesWeather";
 
 export default function Favorites() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const { toggleSearch } = useSearch();
-  const [favoritesWithWeather, setFavoritesWithWeather] = useState<
-    FavoriteWithWeather[]
-  >([]);
   const { favorites, removeFavorite, updateFavoriteName } = useFavoritesStore();
-  const [isLoading, setIsLoading] = useState(true);
 
   // 편집 상태 관리
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingName, setEditingName] = useState("");
-
-  useEffect(() => {
-    const loadFavoritesWithWeather = async () => {
-      setIsLoading(true);
-
-      // 각 즐겨찾기 위치의 날씨 가져오기
-      const weatherPromises = favorites.map(async (favorite) => {
-        try {
-          const weather = await fetchWeatherData({
-            latitude: favorite.lat,
-            longitude: favorite.lng,
-          });
-          return {
-            ...favorite,
-            currentTemp: weather.currentTemp,
-            highTemp: weather.highTemp,
-            lowTemp: weather.lowTemp,
-            condition: weather.condition,
-            hourlyForecast: weather.hourlyForecast,
-            isLoading: false,
-          };
-        } catch (error) {
-          console.error(`날씨 로드 실패 (${favorite.name}):`, error);
-          return {
-            ...favorite,
-            isLoading: false,
-          };
-        }
-      });
-
-      const results = await Promise.all(weatherPromises);
-
-      // 로컬 상태 업데이트 = 사이드 이펙트
-      setFavoritesWithWeather(results);
-      setIsLoading(false);
-    };
-
-    loadFavoritesWithWeather();
-  }, [favorites]); // 즐겨찾기 목록이 바뀔 때(추가/삭제/이름 변경) 새로 페치해서 favoritesWithWeather 갱신 / 만약에 넣지 않으면 해당 effect는 마운트 시 한 번만 실행되고 이후 변경사항 반영 안 됨
+  const { favoritesWithWeather, isLoading } = useFavoritesWeather(favorites);
 
   // 편집 모드 시작
   const handleStartEdit = (id: number, currentName: string) => {
@@ -96,7 +53,7 @@ export default function Favorites() {
       }
       mainCN="w-full pt-[4rem] overflow-x-hidden"
     >
-      <div className="flex items-center gap-3 bg-dark-overlay rounded-3xl px-4 py-4 flex-1 mb-10">
+      <div className="flex items-center gap-3 bg-dark-overlay rounded-3xl px-4 py-4 mb-10">
         <Search size={20} className="text-grey shrink-0" />
 
         <input

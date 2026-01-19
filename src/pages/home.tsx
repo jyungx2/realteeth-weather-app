@@ -1,12 +1,12 @@
 import Layout from "@/widgets/layout/ui";
 import { useSearch } from "@/widgets/search-overlay/model/searchContext";
 import { useNavigate } from "react-router-dom";
-import { useWeather } from "@/features/weather/useWeather";
+import { useCurrentWeather } from "@/features/weather/useCurrentWeather";
 
 export default function Home() {
   const navigate = useNavigate();
   const { toggleSearch } = useSearch();
-  const { weatherData, isLoading, error, refetch } = useWeather();
+  const { weatherData, isLoading, error, refetch } = useCurrentWeather();
 
   // 렌더링할 컨텐츠 결정
   const renderContent = () => {

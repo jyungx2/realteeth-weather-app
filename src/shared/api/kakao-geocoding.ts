@@ -21,12 +21,14 @@ EX) Kakao Local API: 상세 주소까지 정확한 좌표 제공 ✅
  - "서울특별시 종로구 청와대로 1" → (37.5867, 126.9748)
  - "서울특별시 강남구 테헤란로 152" → (37.5048, 127.0493)
  */
-export async function geocodeLocation(address: string): Promise<Coordinates> {
+export async function kakaoGeocodeLocation(
+  address: string,
+): Promise<Coordinates> {
   try {
     // API 키 확인
     if (!KAKAO_API_KEY) {
       throw new Error(
-        "카카오 API 키가 설정되지 않았습니다. .env 파일을 확인하세요."
+        "카카오 API 키가 설정되지 않았습니다. .env 파일을 확인하세요.",
       );
     }
 
@@ -35,14 +37,14 @@ export async function geocodeLocation(address: string): Promise<Coordinates> {
 
     const response = await fetch(
       `https://dapi.kakao.com/v2/local/search/address.json?query=${encodeURIComponent(
-        query
+        query,
       )}`,
       {
         headers: {
           Authorization: `KakaoAK ${KAKAO_API_KEY}`,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
     if (!response.ok) {
       const errorData = await response.text();
@@ -71,7 +73,7 @@ export async function geocodeLocation(address: string): Promise<Coordinates> {
     throw new Error(
       error instanceof Error
         ? error.message
-        : "위치 정보를 가져오는데 실패했습니다."
+        : "위치 정보를 가져오는데 실패했습니다.",
     );
   }
 }

@@ -1,87 +1,66 @@
-// widgets/location-modal/ui/LocationModal.tsx
-import { useEffect, useRef, useState } from "react";
+import { useEffect } from "react";
 import { useLocationModal } from "../model/locationContext";
-import { fetchWeatherData } from "@/shared/api/weather";
-import type { WeatherData } from "@/shared/model/weather";
-// import { geocodeLocation } from "@/shared/api/geocoding";
 import { X, MapPin } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSearch } from "@/widgets/search-overlay/model/searchContext";
 import { useFavoritesStore } from "@/features/favorites/model/useFavoritesStore";
-import { NgeocodeLocation } from "@/shared/api/nominatim-geocoding";
 import toast from "react-hot-toast";
+import { useGeocodeLocation } from "@/features/geocoding/useGeocodelocation";
+import { useWeatherByCoords } from "@/features/weather/useWeatherByCoords";
 
 export default function LocationModal() {
   const { selectedLocation, isModalOpen, closeModal } = useLocationModal();
   const { toggleSearch } = useSearch();
-  // Modal 내부에서 날씨 데이터 관리
-  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  // const [isFavorited, setIsFavorited] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const [coords, setCoords] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
+
   const {
     favorites,
     addFavorite,
     removeFavorite,
     isFavorite: checkIsFavorite,
   } = useFavoritesStore();
-  const toastShownRef = useRef(false); // stirct mode로 인한 중복 토스트 방지용 (리렌더링 없이 상태 공유)
 
   const isFavorited = selectedLocation
     ? checkIsFavorite(selectedLocation.id)
     : false;
-  // 현재 위치가 즐겨찾기에 있는지 확인
-  // useEffect(() => {
-  //   if (selectedLocation) {
-  //     setIsFavorited(checkIsFavorite(selectedLocation.id));
-  //   }
-  // }, [selectedLocation]);
 
-  // selectedLocation이 변경되면 날씨 데이터 가져오기
+  // 1. 주소 → 좌표 변환 (useQuery)
+  const {
+    data: coords,
+    isLoading: isGeocoding,
+    error: geocodeError,
+  } = useGeocodeLocation(selectedLocation?.name ?? null);
+
+  // 2. 좌표 → 날씨 데이터 가져오기 (useQuery)
+  const {
+    data: weatherData,
+    isLoading: isLoadingWeather,
+    error: weatherError,
+  } = useWeatherByCoords(coords);
+
+  const isLoading = isGeocoding || isLoadingWeather;
+  const error = geocodeError || weatherError;
+
   useEffect(() => {
-    if (!selectedLocation) return;
-
-    const loadWeatherData = async () => {
-      setIsLoading(true);
-      toastShownRef.current = false;
-
-      try {
-        const coords = await NgeocodeLocation(selectedLocation.name); // 주소 → 좌표 변환
-        setCoords(coords); // 좌표 상태에 저장
-
-        const weather = await fetchWeatherData(coords); // 좌표 → 날씨정보 GET
-        setWeatherData(weather); // 로컬 상태에 저장
-      } catch {
-        if (!toastShownRef.current) {
-          toastShownRef.current = true; // 토스트 표시했다고 기록
-
-          toast.error("해당 장소의 정보가 제공되지 않습니다.", {
-            duration: 3000,
-            position: "top-center",
-            style: {
-              background: "#EF4444",
-              color: "#fff",
-              padding: "18px",
-              borderRadius: "12px",
-              fontSize: "14px",
-            },
-            icon: "⚠️",
-          });
-
-          closeModal();
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadWeatherData();
-  }, [selectedLocation]);
+    if (error) {
+      // toast.error는 이미 중복 방지 기능 내장
+      toast.error("해당 장소의 정보가 제공되지 않습니다.", {
+        id: "location-error", // 🎯 같은 ID면 중복 안 뜸
+        duration: 3000,
+        position: "top-center",
+        style: {
+          background: "#EF4444",
+          color: "#fff",
+          padding: "18px",
+          borderRadius: "12px",
+          fontSize: "14px",
+        },
+        icon: "⚠️",
+      });
+      closeModal();
+    }
+  }, [error, closeModal]);
 
   // 즐겨찾기 토글
   const handleToggleFavorite = () => {
@@ -106,8 +85,8 @@ export default function LocationModal() {
 
       if (success) {
         alert("즐겨찾기에 추가되었습니다.");
-        closeModal();
-        toggleSearch();
+        closeModal(); // 위치 모달 닫기
+        toggleSearch(); // 검색 오버레이 닫기
 
         // 이미 favorites 페이지면 navigate X -> history stack에 중복 추가 방지
         if (location.pathname !== "/favorites") {
