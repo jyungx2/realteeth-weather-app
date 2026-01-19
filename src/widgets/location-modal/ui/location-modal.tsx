@@ -5,8 +5,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useSearch } from "@/widgets/search-overlay/model/searchContext";
 import { useFavoritesStore } from "@/features/favorites/model/useFavoritesStore";
 import toast from "react-hot-toast";
-import { useGeocodeLocation } from "@/features/geocoding/useGeocodelocation";
 import { useWeatherByCoords } from "@/features/weather/useWeatherByCoords";
+import { useGeocodeLocation } from "@/features/geocoding/useGeocodeLocation";
 
 export default function LocationModal() {
   const { selectedLocation, isModalOpen, closeModal } = useLocationModal();
