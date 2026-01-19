@@ -5,23 +5,22 @@ import koreaDistrictsData from "@/data/korea_districts.json";
 import { useLocationModal } from "@/widgets/location-modal/model/locationContext";
 import { useSearch } from "@/widgets/search-overlay/model/searchContext";
 
+// 모듈 로드 시 한 번만 실행 (모든 컴포넌트 인스턴스가 공유)
+const ALL_LOCATIONS = koreaDistrictsData.map((location: string, i: number) => {
+  const parsed = parseLocationString(location, i);
+  return {
+    id: parsed.id,
+    name: parsed.displayName,
+    city: parsed.city,
+  };
+});
+
 export default function SearchForm() {
   const { toggleSearch } = useSearch();
   const [searchQuery, setSearchQuery] = useState("");
   const { openModal } = useLocationModal();
 
-  // JSON 데이터를 SelectedLocation 형식으로 변환
-  const allLocations = useMemo(() => {
-    return koreaDistrictsData.map((location: string, i: number) => {
-      const parsed = parseLocationString(location, i);
-
-      return {
-        id: parsed.id,
-        name: parsed.displayName,
-        city: parsed.city,
-      };
-    });
-  }, []);
+  const allLocations = ALL_LOCATIONS;
 
   // 검색 필터링
   const filteredResults = useMemo(() => {
