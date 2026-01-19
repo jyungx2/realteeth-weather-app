@@ -39,20 +39,57 @@ npm run preview
 ---
 
 ## 2. 구현한 기능에 대한 설명
-- 홈페이지(‘/‘)
+### 🔹 페이지 (/pages)
+**[1] 홈페이지(‘/‘)**
   - 검색 기능: 원하는 지역에 대한 날씨 정보 조회 가능 -> 즐겨찾기 추가 가능
   - 즐겨찾기 추가 시, 즐겨찾기 페이지로 이동
   - 이미 즐겨찾기에 추가된 지역의 경우, ‘추가’ 버튼 대신 ‘제거’ 버튼 표시
+ 
+ #### 🧩 구현 로직
+  * 파일 경로: src/features/weather/useCurrentWeather.tsx
+   1) 브라우저 내장 API (navigator.geolocation.getCurrentPosition)을 통해 현재 위치에 대한 좌표를 받아옴
+      - 📁 src/shared/api/getCurrentPosition.ts
+   3) 좌표를 기반으로 openWeatherMap API을 이용해 현재 날씨 정보, 시간대별(3시간 간격) 날씨 정보, 좌표를 지역으로 변환하는 역지오코딩 API를 이용해 반환
+      - 📁 src/shared/api/fetchWeather.ts
 
-- 즐겨찾기 페이지(‘/favorites’)
+---
+
+**[2] 즐겨찾기 페이지(/favorites)**
   - 홈페이지와 동일하게 검색 기능 사용 가능
   - 연필 버튼을 통해 장소(지역) 이름 수정 가능
   - 휴지통 버튼을 통해 삭제 가능
   - 즐겨찾기 카드 클릭 시, 상세 페이지로 이동
 
-- 상세 페이지(‘/detail’)
+#### 🧩 구현 로직
+  * 파일 경로: src/features/weather/useCurrentWeather.tsx
+  1) 즐겨찾기 상태는 location-modal 컴포넌트와 favorites 페이지에서 사용되므로 Zustand 전역 상태 라이브러리를 이용해 관리했습니다.
+  2) 즐겨찾기 상태값은 위치 정보(id/name/city/lat/lng)만 포함한 객체 데이터로, 날씨 데이터는 실시간으로 받아와 반영해야 하기 때문에 즐겨찾기 상태에 포함하지 않고, useQuery로 데이터를 요청하는 훅을 만들어 임포트하여 사용했습니다.
+     - 📁 src/features/weather/useFavoritesWeather.ts
+
+---
+
+**[3] 상세 페이지(/detail)**
+  - 즐겨찾기 페이지에서 navigate의 state 속성으로 날씨 데이터를 포함한 즐겨찾기 상태를 보낸 후, useLocation으로 값을 추출해 렌더링
   - 홈페이지와 동일한 UI로 날씨 정보 조회 가능
 
+---
+
+### 🔹 컴포넌트 (/widgets)
+- 전체 페이지 레이아웃 덮는 UI
+- 홈/즐겨찾기 페이지에서 접근 가능
+-> 아래 두 개의 컴포넌트는 여러 페이지 컴포넌트에서 접근/사용되어야 하고, 전체 레이아웃을 덮는 전역 컴포넌트이기 떄문에 Context API로 UI 토글 상태를 관리하였습니다. 
+  
+**[1] 검색 오버레이(search-overlay)**
+ - 제공받은 대한민국 행정구역 json 파일을 data 폴더에 저장하고, 컴포넌트 외부에서 모듈 로드 시 한 번만 파싱하여 전역 상수로 관리하며, 사용자의 검색어와 매칭되는 값들을 useMemo로 필터링하여 렌더링
+   
+
+**[2] 위치 모달(location-modal)**
+  - 유저가 선택한 위치에 대한 실시간 날씨 정보를 렌더링
+    - 선택 위치에 대한 좌표 정보(위도/경도)를 useQuery로 조회
+      - 📁 /src/features/geocoding/useGeocodeLocation.ts
+    - 받아온 좌표를 기반으로 날씨 정보를 useQuery로 조회
+      - 📁 /src/features/weather/useWeatherByCoords.ts
+   
 ---
 
 ### 📂 디렉토리 구조 (Feature-Sliced Design 아키텍처)
@@ -99,7 +136,6 @@ src/
 │   ├── api/
 │   │   ├── fetchWeather.ts
 │   │   ├── getCurrentPosition.ts
-│   │   ├── kakao-geocoding.ts
 │   │   └── nominatim-geocoding.ts
 │   ├── model/
 │   │   ├── header.ts
@@ -132,9 +168,26 @@ src/
 
 
 ## 3. 기술적 의사결정 및 이유
-- Context API를 활용한 전역 UI 상태 관리  
-: 검색 오버레이(search-overlay)와 **위치 모달(location-modal)** 같은 전역 UI 컴포넌트를 전역 상태 라이브러리(Zustand/Redux) 대신, Context API로 구현했습니다.
+- Nominatim Geocoding API 사용
+초기에는 Kakao Local API의 Geocoding을 사용하여 주소를 좌표로 변환했습니다. 하지만 Kakao 지도 API는 추가 기능 심사 절차가 필요하며, 승인까지 약 일주일이 소요되어 프로젝트 일정상 대안이 필요했습니다.
+OpenWeather API에도 Geocoding 기능이 있지만, 광역시/도 단위까지만 구분하여 구/동이 달라도 동일한 좌표를 반환하는 문제가 있었습니다.
+```ts
+1. OpenWeather: 구/동이 달라도 모두 같은 "서울" 좌표 반환 ❌
+ - "서울특별시 종로구 청와대로 1" → OpenWeather: 서울 (37.5665, 126.9780)
+ - "서울특별시 강남구 테헤란로 152" → OpenWeather: 서울 (37.5665, 126.9780)
 
+
+2. Kakao Local API: 상세 주소까지 정확한 좌표 제공 ✅
+ - "서울특별시 종로구 청와대로 1" → (37.5867, 126.9748)
+ - "서울특별시 강남구 테헤란로 152" → (37.5048, 127.0493)
+```
+따라서 구/동 단위까지 정확한 좌표를 제공하는 Nominatim Geocoding API를 사용하여 주소를 좌표로 변환하도록 구현했습니다.
+
+---
+
+- Context API를 활용한 전역 UI 상태 관리  
+: 검색 오버레이(search-overlay)와 위치 모달(location-modal) 같은 전역 UI 컴포넌트의 열림/닫힘 상태를 전역 상태 라이브러리(Zustand/Redux) 대신 Context API로 구현했습니다.
+UI 토글 상태는 별도의 비즈니스 로직이 필요 없고 LocalStorage에 저장할 필요도 없는 단순한 boolean 값이기 때문에, 가벼운 Context API가 적합하다고 판단했습니다.
     
 ## 선택 이유
 ### 1. 스타일링 관리 최소화
