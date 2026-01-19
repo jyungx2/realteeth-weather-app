@@ -1,6 +1,6 @@
 ## 1. 프로젝트 실행 방법
 ### 📱 배포 사이트에서 실행
-배포된 사이트에 바로 접속하여 사용할 수 있습니다.
+배포된 사이트에 바로 접속하여 사용할 수 있습니다.  
 🔗 **배포 URL**: [realteeth-weather-app](https://realteeth-weather-app.vercel.app/)
 
 ---
