@@ -45,11 +45,11 @@ npm run preview
   - 즐겨찾기 추가 시, 즐겨찾기 페이지로 이동
   - 이미 즐겨찾기에 추가된 지역의 경우, ‘추가’ 버튼 대신 ‘제거’ 버튼 표시
  
- #### 🧩 공공 API(openWeatherMap) 기반의 현재 위치 날씨 조회 구현 로직
+ #### 🧩 공공 API(OpenWeatherMap) 기반의 현재 위치 날씨 조회 구현 로직
   * 파일 경로: src/features/weather/useCurrentWeather.tsx
    1) 브라우저 내장 API (navigator.geolocation.getCurrentPosition)을 통해 현재 위치에 대한 좌표를 받아옴
       - 📁 src/shared/api/getCurrentPosition.ts
-   2) 좌표를 기반으로 openWeatherMap API을 이용해 현재 날씨 정보, 시간대별(3시간 간격) 날씨 정보, 좌표를 지역으로 변환하는 역지오코딩 API를 이용해 반환
+   2) 좌표를 기반으로 OpenWeatherMap API을 이용해 현재 날씨 정보, 시간대별(3시간 간격) 날씨 정보, 좌표를 지역으로 변환하는 역지오코딩 API를 이용해 반환
       > ❗️ 1시간 간격 날씨 정보는 유료 플랜에서만 제공되어, 무료로 제공되는 3시간 간격 예보 데이터를 활용했습니다.
       - 📁 src/shared/api/fetchWeather.ts
 
@@ -61,7 +61,7 @@ npm run preview
   - 휴지통 버튼을 통해 삭제 가능
   - 즐겨찾기 카드 클릭 시, 상세 페이지로 이동
 
-#### 🧩 공공 API(openWeatherMap) 기반의 즐겨찾기 장소의 날씨 조회 구현 로직
+#### 🧩 공공 API(OpenWeatherMap) 기반의 즐겨찾기 장소의 날씨 조회 구현 로직
   1) 즐겨찾기 상태는 location-modal 컴포넌트와 favorites 페이지에서 사용되므로 Zustand 전역 상태 라이브러리를 이용해 관리했습니다.
   2) 즐겨찾기 상태값은 위치 정보(id/name/city/lat/lng)만 포함한 객체 데이터로, 날씨 데이터는 실시간으로 받아와 반영해야 하기 때문에 즐겨찾기 상태에 포함하지 않고, useQueries로 여러 즐겨찾기 항목의 날씨 데이터를 병렬로 요청하는 훅을 만들어 임포트하여 사용했습니다.
      - 📁 src/features/weather/useFavoritesWeather.ts
@@ -168,7 +168,7 @@ src/
 
 
 ## 3. 기술적 의사결정 및 이유
-- Nominatim Geocoding API 사용
+### [1] Nominatim Geocoding API 사용  
 초기에는 Kakao Local API의 Geocoding을 사용하여 주소를 좌표로 변환했습니다. 하지만 Kakao 지도 API는 추가 기능 심사 절차가 필요하며, 승인까지 약 일주일이 소요되어 프로젝트 일정상 대안이 필요했습니다.
 OpenWeather API에도 Geocoding 기능이 있지만, 광역시/도 단위까지만 구분하여 구/동이 달라도 동일한 좌표를 반환하는 문제가 있었습니다.
 ```ts
@@ -185,8 +185,8 @@ OpenWeather API에도 Geocoding 기능이 있지만, 광역시/도 단위까지�
 
 ---
 
-- Context API를 활용한 전역 UI 상태 관리  
-: 검색 오버레이(search-overlay)와 위치 모달(location-modal) 같은 전역 UI 컴포넌트의 열림/닫힘 상태를 전역 상태 라이브러리(Zustand/Redux) 대신 Context API로 구현했습니다.
+### [2] Context API를 활용한 전역 UI 상태 관리  
+검색 오버레이(search-overlay)와 위치 모달(location-modal) 같은 전역 UI 컴포넌트의 열림/닫힘 상태를 전역 상태 라이브러리(Zustand/Redux) 대신 Context API로 구현했습니다.
 UI 토글 상태는 별도의 비즈니스 로직이 필요 없고 LocalStorage에 저장할 필요도 없는 단순한 boolean 값이기 때문에, 가벼운 Context API가 적합하다고 판단했습니다.
     
 ## 선택 이유
@@ -434,7 +434,7 @@ export function SearchLayer() {
 
 ### 2. useMemo & useCallback으로 불필요한 업데이트 방지
 Context Provider의 value는 객체 참조로 비교되므로, 
-Provider가 리렌더링될 때 새로운 참조값이 생성되어 해당 컨텍스트를 구독한 모든 컴포넌트들이 함께 리렌더링됩니다. 
+Provider가 리렌더링될 때마다 새로운 참조값이 생성되어 해당 컨텍스트를 구독한 모든 컴포넌트들이 함께 리렌더링됩니다. 
 ```ts
 // app/providers/SearchProvider.tsx
   const toggle = useCallback(() => {
@@ -450,7 +450,7 @@ Provider가 리렌더링될 때 새로운 참조값이 생성되어 해당 컨�
   );
 ```
 
-현재는 Provider 부모(AppProviders)에 컨텍스트와 무관한 상태가 없어 리렌더링될 상황이 없지만, 향후 기능 확장 시 (예: 전역 테마, 사용자 설정 등의 상태 추가) 각 Provider가 독립적으로 동작하도록 미리 메모이제이션을 적용했습니다.
+현재는 Provider 부모(AppProviders)에 컨텍스트와 무관한 상태가 없어 리렌더링될 상황이 없지만, 향후 기능 확장을 대비해 (예: 전역 테마, 사용자 설정 등의 상태 추가) 각 Provider가 독립적으로 동작하도록 미리 메모이제이션을 적용했습니다.
 ```ts
 import type { ReactNode } from "react";
 import { QueryProvider } from "@/app/providers/QueryProvider";
@@ -473,5 +473,6 @@ export function AppProviders({ children }: AppProvidersProps) {
 ```
 
 ## 4. 사용한 기술 스택
-HTML5, CSS3, TailwindCSS, TypeScript, React, Zustand, Tanstack Query
+- Front-End: HTML5, CSS3, TailwindCSS, TypeScript, React, Zustand, Tanstack Query
+- API: OpenWeatherMap API (날씨 정보, 역지오코딩), Nominatim Geocoding API (주소 → 좌표 변환)
 
