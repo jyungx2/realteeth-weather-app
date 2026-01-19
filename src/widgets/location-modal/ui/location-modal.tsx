@@ -3,7 +3,7 @@ import { useLocationModal } from "../model/locationContext";
 import { X, MapPin } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSearch } from "@/widgets/search-overlay/model/searchContext";
-import { useFavoritesStore } from "@/features/favorites/model/useFavoritesStore";
+import { useFavoritesStore } from "@/features/favorites/useFavoritesStore";
 import toast from "react-hot-toast";
 import { useWeatherByCoords } from "@/features/weather/useWeatherByCoords";
 import { useGeocodeLocation } from "@/features/geocoding/useGeocodeLocation";

@@ -1,7 +1,7 @@
 import type { Location } from "@/shared/model/location";
 import { LocationContext } from "@/widgets/location-modal/model/locationContext";
 
-import { useState, type ReactNode } from "react";
+import { useState, useCallback, useMemo, type ReactNode } from "react";
 
 export function LocationProvider({ children }: { children: ReactNode }) {
   // UI 상태
@@ -13,20 +13,23 @@ export function LocationProvider({ children }: { children: ReactNode }) {
   );
 
   // UI 제어 함수
-  const openModal = (location: Location) => {
-    setSelectedLocation(location); // 데이터 전달
-    setIsModalOpen(true); // 모달 열기
-  };
+  const openModal = useCallback((location: Location) => {
+    setSelectedLocation(location);
+    setIsModalOpen(true);
+  }, []);
 
-  const closeModal = () => {
-    setIsModalOpen(false); // 모달 닫기
-    setTimeout(() => setSelectedLocation(null), 300); // 정리
-  };
+  const closeModal = useCallback(() => {
+    setIsModalOpen(false);
+    setTimeout(() => setSelectedLocation(null), 300);
+  }, []);
+
+  const value = useMemo(
+    () => ({ selectedLocation, isModalOpen, openModal, closeModal }),
+    [selectedLocation, isModalOpen, openModal, closeModal],
+  );
 
   return (
-    <LocationContext.Provider
-      value={{ selectedLocation, isModalOpen, openModal, closeModal }}
-    >
+    <LocationContext.Provider value={value}>
       {children}
     </LocationContext.Provider>
   );

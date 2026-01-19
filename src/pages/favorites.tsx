@@ -3,7 +3,7 @@ import { useSearch } from "@/widgets/search-overlay/model/searchContext";
 import { Search, X } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useFavoritesStore } from "@/features/favorites/model/useFavoritesStore";
+import { useFavoritesStore } from "@/features/favorites/useFavoritesStore";
 import { useFavoritesWeather } from "@/features/weather/useFavoritesWeather";
 
 export default function Favorites() {

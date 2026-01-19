@@ -1,6 +1,4 @@
-// features/weather/useWeatherByCoords.ts
 import { useQuery } from "@tanstack/react-query";
-
 import type { Coordinates } from "@/shared/model/location";
 import type { WeatherData } from "@/shared/model/weather";
 import { fetchWeatherData } from "@/shared/api/fetchWeather";
